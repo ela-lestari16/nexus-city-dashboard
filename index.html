@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEXUS CITY - Smart City Digital Twin & AI Urban Command Center</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Orbitron -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            dark: '#050811',
+                            card: '#0a1022',
+                            border: '#1e293b',
+                            cyan: '#00f0ff',
+                            magenta: '#ff007f',
+                            amber: '#ffb700',
+                            green: '#00ff66',
+                            purple: '#a855f7'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Orbitron', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #030712;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        /* Scanline Overlay Effect for Kiosk feel */
+        .scanlines {
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.3);
+        }
+
+        .glow-magenta {
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.3);
+        }
+
+        .border-glow {
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            box-shadow: inset 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #00f0ff;
+            border-radius: 2px;
+        }
+
+        @keyframes pulse-fast {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        .animate-pulse-fast {
+            animation: pulse-fast 1s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans relative text-slate-100 antialiased selection:bg-cyan-500 selection:text-black">
+    <div class="fixed inset-0 scanlines z-50 pointer-events-none opacity-40"></div>
+
+    <!-- HEADER BAR -->
+    <header class="bg-slate-950/90 border-b border-cyan-900/50 px-4 py-2.5 backdrop-blur-md flex flex-wrap items-center justify-between gap-4 z-40 sticky top-0 shadow-lg shadow-cyan-950/20">
+        <!-- Logo & Title -->
+        <div class="flex items-center space-x-3">
+            <div class="relative flex items-center justify-center w-10 h-10 rounded-lg bg-cyan-950 border border-cyan-400/50 glow-cyan">
+                <i class="fa-solid fa-city text-cyan-400 text-lg"></i>
+                <span class="absolute -top-1 -right-1 flex h-3 w-3">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-3 w-3 bg-cyan-500"></span>
+                </span>
+            </div>
+            <div>
+                <div class="flex items-center space-x-2">
+                    <h1 class="font-display font-black text-lg md:text-xl tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-indigo-400">
+                        NEXUS CITY
+                    </h1>
+                    <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded bg-cyan-900/60 border border-cyan-500/40 text-cyan-300 font-bold tracking-widest">
+                        EXPO v3.8
+                    </span>
+                </div>
+                <p class="text-xs text-slate-400 font-mono flex items-center gap-2">
+                    <span>AI Urban Digital Twin Command Center</span>
+                    <span class="text-cyan-500">•</span>
+                    <span class="text-emerald-400 flex items-center gap-1">
+                        <i class="fa-solid fa-signal text-[10px]"></i> 100Gbps IoT Grid
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <!-- System KPI Quick Indicators -->
+        <div class="hidden lg:flex items-center space-x-6 text-xs font-mono bg-slate-900/80 px-4 py-1.5 rounded-lg border border-slate-800">
+            <div>
+                <span class="text-slate-400">AI Core Load:</span>
+                <span id="header-ai-load" class="text-cyan-400 font-bold ml-1">34%</span>
+            </div>
+            <div class="h-4 w-px bg-slate-700"></div>
+            <div>
+                <span class="text-slate-400">Status Darurat:</span>
+                <span id="header-emergency-status" class="text-emerald-400 font-bold ml-1">NORMAL</span>
+            </div>
+            <div class="h-4 w-px bg-slate-700"></div>
+            <div>
+                <span class="text-slate-400">Waktu Sistem:</span>
+                <span id="header-clock" class="text-amber-400 font-bold ml-1">00:00:00 WIB</span>
+            </div>
+        </div>
+
+        <!-- Action Control Buttons -->
+        <div class="flex items-center space-x-2">
+            <!-- Audio Toggle -->
+            <button id="btn-audio" onclick="toggleAudio()" class="px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-xs font-mono text-cyan-300 transition flex items-center space-x-2 shadow">
+                <i id="audio-icon" class="fa-solid fa-volume-high text-cyan-400"></i>
+                <span id="audio-label">SFX: ON</span>
+            </button>
+
+            <!-- Auto Demo Mode (Expo Mode) -->
+            <button id="btn-expo" onclick="toggleExpoMode()" class="px-3 py-1.5 rounded-lg bg-indigo-950/80 border border-indigo-500/50 hover:border-indigo-400 text-xs font-mono text-indigo-300 transition flex items-center space-x-2 shadow">
+                <i class="fa-solid fa-wand-magic-sparkles text-amber-400"></i>
+                <span id="expo-label">EXPO MODE</span>
+            </button>
+
+            <!-- Fullscreen Toggle -->
+            <button onclick="toggleFullscreen()" class="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 hover:border-cyan-400 text-xs font-mono text-slate-300 transition" title="Layar Penuh">
+                <i class="fa-solid fa-expand"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- MAIN INTERFACE BODY -->
+    <main class="flex-1 p-3 md:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4 max-w-[1920px] mx-auto w-full">
+        
+        <!-- LEFT COLUMN: CONTROLS & INTERACTIVE MODULES (3 cols) -->
+        <section class="lg:col-span-3 flex flex-col space-y-4">
+            
+            <!-- Module Selector Tabs -->
+            <div class="bg-slate-900/90 rounded-xl p-2 border border-slate-800 flex flex-col space-y-2 glow-cyan">
+                <div class="flex items-center justify-between px-2 py-1">
+                    <span class="text-xs font-display font-bold text-cyan-400 tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-sliders"></i> MODUL KONTROL KOTA
+                    </span>
+                    <span class="text-[10px] font-mono text-slate-400">INTERAKTIF</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-1.5 font-mono text-xs">
+                    <button onclick="switchTab('traffic')" id="tab-traffic" class="tab-btn px-2.5 py-2 rounded-lg border border-cyan-500/50 bg-cyan-950/60 text-cyan-300 font-semibold flex items-center justify-center space-x-1.5 transition">
+                        <i class="fa-solid fa-car"></i>
+                        <span>Lalu Lintas</span>
+                    </button>
+                    <button onclick="switchTab('energy')" id="tab-energy" class="tab-btn px-2.5 py-2 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 hover:text-slate-200 flex items-center justify-center space-x-1.5 transition">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Energi Grid</span>
+                    </button>
+                    <button onclick="switchTab('emergency')" id="tab-emergency" class="tab-btn px-2.5 py-2 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 hover:text-slate-200 flex items-center justify-center space-x-1.5 transition">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Darurat AI</span>
+                    </button>
+                    <button onclick="switchTab('cyber')" id="tab-cyber" class="tab-btn px-2.5 py-2 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 hover:text-slate-200 flex items-center justify-center space-x-1.5 transition">
+                        <i class="fa-solid fa-network-wired"></i>
+                        <span>Siber IoT</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- CONTROL CONTENT PANELS -->
+            <div class="bg-slate-900/90 rounded-xl p-4 border border-slate-800 flex-1 flex flex-col justify-between shadow-xl backdrop-blur">
+                
+                <!-- TAB 1: TRAFFIC MANAGEMENT -->
+                <div id="panel-traffic" class="control-panel space-y-4">
+                    <div class="border-b border-slate-800 pb-2">
+                        <h3 class="text-sm font-display font-bold text-cyan-300 flex items-center gap-2">
+                            <i class="fa-solid fa-traffic-light text-cyan-400"></i> Optimasi Lalu Lintas AI
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Pengaturan sinyal adaptif & manajemen transportasi otonom.</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button onclick="optimizeTraffic()" class="w-full py-2.5 px-3 rounded-lg bg-cyan-600 hover:bg-cyan-500 text-black font-bold font-mono text-xs transition flex items-center justify-center space-x-2 shadow-lg shadow-cyan-900/40 active:scale-95">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span>OPTIMALKAN LAMPU HIJAU AI</span>
+                        </button>
+
+                        <button onclick="dispatchBuses()" class="w-full py-2.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-cyan-500/30 text-cyan-300 font-bold font-mono text-xs transition flex items-center justify-center space-x-2 active:scale-95">
+                            <i class="fa-solid fa-bus-simple"></i>
+                            <span>TAMBAH BUS OTONOM (+4)</span>
+                        </button>
+
+                        <button onclick="triggerTrafficJam()" class="w-full py-2.5 px-3 rounded-lg bg-amber-950/60 hover:bg-amber-900/80 border border-amber-500/40 text-amber-300 font-bold font-mono text-xs transition flex items-center justify-center space-x-2 active:scale-95">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                            <span>SIMULASI KEMACETAN SEKTOR 3</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 space-y-2 text-xs font-mono">
+                        <div class="flex justify-between text-slate-400">
+                            <span>Status Kemacetan:</span>
+                            <span id="traffic-status-text" class="text-emerald-400 font-bold">LANCAR (28%)</span>
+                        </div>
+                        <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                            <div id="traffic-bar" class="bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 h-full w-[28%] transition-all duration-500"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 2: RENEWABLE ENERGY GRID -->
+                <div id="panel-energy" class="control-panel hidden space-y-4">
+                    <div class="border-b border-slate-800 pb-2">
+                        <h3 class="text-sm font-display font-bold text-amber-300 flex items-center gap-2">
+                            <i class="fa-solid fa-solar-panel text-amber-400"></i> Grid Energi Terbarukan
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Kontrol daya Tenaga Surya & Angin Kota Digital Twin.</p>
+                    </div>
+
+                    <div class="space-y-4 font-mono text-xs">
+                        <div>
+                            <div class="flex justify-between mb-1 text-slate-300">
+                                <span>Output Solar Park:</span>
+                                <span id="val-solar" class="text-amber-400 font-bold">75 MW</span>
+                            </div>
+                            <input type="range" id="slider-solar" min="10" max="150" value="75" oninput="updateEnergyGrid()" class="w-full accent-amber-400 bg-slate-800 rounded cursor-pointer">
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between mb-1 text-slate-300">
+                                <span>Turbin Angin Pesisir:</span>
+                                <span id="val-wind" class="text-cyan-400 font-bold">60 MW</span>
+                            </div>
+                            <input type="range" id="slider-wind" min="10" max="150" value="60" oninput="updateEnergyGrid()" class="w-full accent-cyan-400 bg-slate-800 rounded cursor-pointer">
+                        </div>
+
+                        <div class="pt-2">
+                            <button id="btn-eco-mode" onclick="toggleEcoMode()" class="w-full py-2.5 px-3 rounded-lg bg-emerald-950/80 hover:bg-emerald-900 border border-emerald-500/50 text-emerald-300 font-bold font-mono text-xs transition flex items-center justify-center space-x-2 active:scale-95">
+                                <i class="fa-solid fa-leaf text-emerald-400"></i>
+                                <span id="eco-label">MODE HEMAT ENERGI: NONAKTIF</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 space-y-2 text-xs font-mono">
+                        <div class="flex justify-between text-slate-400">
+                            <span>Keseimbangan Daya:</span>
+                            <span id="energy-balance-text" class="text-emerald-400 font-bold">+25 MW (SURPLUS)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: EMERGENCY & DRONE COMMAND -->
+                <div id="panel-emergency" class="control-panel hidden space-y-4">
+                    <div class="border-b border-slate-800 pb-2">
+                        <h3 class="text-sm font-display font-bold text-rose-400 flex items-center gap-2">
+                            <i class="fa-solid fa-helicopter text-rose-500"></i> Drone & Respons Darurat
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Peluncuran armada drone penyelamat & pemadam cepat.</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button onclick="triggerEmergencyEvent()" class="w-full py-2.5 px-3 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold font-mono text-xs transition flex items-center justify-center space-x-2 shadow-lg shadow-rose-950/60 active:scale-95 animate-pulse">
+                            <i class="fa-solid fa-fire-flame-curled"></i>
+                            <span>SIMULASI KEBAKARAN / INSIDEN</span>
+                        </button>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="dispatchFireDrone()" class="py-2 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-rose-500/40 text-rose-300 font-bold font-mono text-[11px] transition flex items-center justify-center space-x-1 active:scale-95">
+                                <i class="fa-solid fa-fire-extinguisher"></i>
+                                <span>DRONE PEMADAM</span>
+                            </button>
+                            <button onclick="dispatchMedicalDrone()" class="py-2 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-cyan-500/40 text-cyan-300 font-bold font-mono text-[11px] transition flex items-center justify-center space-x-1 active:scale-95">
+                                <i class="fa-solid fa-truck-medical"></i>
+                                <span>DRONE MEDIS</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 text-xs font-mono space-y-1">
+                        <div class="text-slate-400">Armada Active Drone: <span id="active-drones-count" class="text-cyan-400 font-bold">2 Drones Patroli</span></div>
+                        <div class="text-slate-400">Respon Efektif AI: <span class="text-emerald-400 font-bold">99.4%</span></div>
+                    </div>
+                </div>
+
+                <!-- TAB 4: CYBERSECURITY IOT -->
+                <div id="panel-cyber" class="control-panel hidden space-y-4">
+                    <div class="border-b border-slate-800 pb-2">
+                        <h3 class="text-sm font-display font-bold text-purple-400 flex items-center gap-2">
+                            <i class="fa-solid fa-shield-virus text-purple-400"></i> Keamanan Siber IoT Kota
+                        </h3>
+                        <p class="text-xs text-slate-400 mt-1">Proteksi infrastruktur kritis dari ancaman serangan siber.</p>
+                    </div>
+
+                    <div class="space-y-3">
+                        <button onclick="toggleFirewall()" id="btn-firewall" class="w-full py-2.5 px-3 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold font-mono text-xs transition flex items-center justify-center space-x-2 shadow-lg shadow-purple-950/50 active:scale-95">
+                            <i class="fa-solid fa-lock"></i>
+                            <span id="firewall-label">AKTIFKAN AI FIREWALL HIGH-SHIELD</span>
+                        </button>
+
+                        <button onclick="simulateCyberAttack()" class="w-full py-2.5 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-purple-500/40 text-purple-300 font-bold font-mono text-xs transition flex items-center justify-center space-x-2 active:scale-95">
+                            <i class="fa-solid fa-bug"></i>
+                            <span>SIMULASI SERANGAN DDOS IOT</span>
+                        </button>
+                    </div>
+
+                    <div class="bg-slate-950 rounded-lg p-3 border border-slate-800 text-xs font-mono space-y-1">
+                        <div class="flex justify-between text-slate-400">
+                            <span>Status Ancaman:</span>
+                            <span id="cyber-threat-text" class="text-emerald-400 font-bold">AMAN (0 DETEKSI)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom Kiosk Quick Hint -->
+                <div class="mt-4 pt-3 border-t border-slate-800/80 text-[11px] text-slate-400 font-mono flex items-center gap-2">
+                    <i class="fa-solid fa-hand-pointer text-cyan-400 animate-bounce"></i>
+                    <span>Pengunjung Pameran: Klik peta kota untuk inspeksi sensor & zona!</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- CENTER COLUMN: INTERACTIVE DIGITAL TWIN CANVAS MAP (6 cols) -->
+        <section class="lg:col-span-6 flex flex-col space-y-3">
+            <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 flex-1 flex flex-col relative shadow-2xl overflow-hidden glow-cyan">
+                
+                <!-- Canvas Header Bar Overlay -->
+                <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800/80 z-10">
+                    <div class="flex items-center space-x-2">
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-cyan-950 border border-cyan-500/40 text-cyan-300">
+                            <i class="fa-solid fa-layer-group mr-1"></i> LIVE DIGITAL TWIN
+                        </span>
+                        <span class="text-xs font-mono text-slate-400 hidden sm:inline" id="map-hover-coords">X: 520 | Y: 340</span>
+                    </div>
+
+                    <!-- Map Overlay Layers Toggle Buttons -->
+                    <div class="flex items-center space-x-1 font-mono text-[11px]">
+                        <button onclick="toggleMapLayer('traffic')" id="layer-traffic-btn" class="px-2 py-1 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 font-semibold">Lalu Lintas</button>
+                        <button onclick="toggleMapLayer('energy')" id="layer-energy-btn" class="px-2 py-1 rounded bg-slate-800 text-slate-400 border border-slate-700">Grid Energi</button>
+                        <button onclick="toggleMapLayer('sensors')" id="layer-sensors-btn" class="px-2 py-1 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 font-semibold">IoT Sensor</button>
+                    </div>
+                </div>
+
+                <!-- Interactive City Canvas Container -->
+                <div class="relative flex-1 w-full h-[400px] md:h-[520px] rounded-lg overflow-hidden bg-slate-950 cursor-crosshair border border-slate-800" id="canvas-container">
+                    <canvas id="cityCanvas" class="w-full h-full block"></canvas>
+
+                    <!-- Interactive HUD Popup Overlay when clicking Canvas Zone -->
+                    <div id="zone-modal" class="hidden absolute top-4 left-4 right-4 sm:right-auto sm:w-80 bg-slate-950/95 border border-cyan-400/80 rounded-lg p-3 text-xs font-mono shadow-2xl backdrop-blur z-20 animate-fade-in">
+                        <div class="flex justify-between items-center border-b border-slate-800 pb-1.5 mb-2">
+                            <span id="zone-modal-title" class="font-bold text-cyan-300 flex items-center gap-1.5">
+                                <i class="fa-solid fa-microchip text-cyan-400"></i> DETEKSI ZONA SENSOR #4
+                            </span>
+                            <button onclick="closeZoneModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                        <div class="space-y-1.5 text-slate-300">
+                            <div class="flex justify-between"><span>Tipe Infrastruktur:</span> <span id="zone-type" class="text-cyan-400">Gedung Komersial AI</span></div>
+                            <div class="flex justify-between"><span>Konsumsi Daya:</span> <span id="zone-power" class="text-amber-400">12.4 MW</span></div>
+                            <div class="flex justify-between"><span>Kualitas Udara:</span> <span id="zone-air" class="text-emerald-400">PM2.5: 18 (Sangat Baik)</span></div>
+                            <div class="flex justify-between"><span>Status Jaringan IoT:</span> <span id="zone-status" class="text-emerald-400">TERHUBUNG (100%)</span></div>
+                        </div>
+                        <div class="mt-3 pt-2 border-t border-slate-800 flex justify-end">
+                            <button onclick="dispatchDroneToZone()" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-black font-bold rounded text-[10px] transition">
+                                <i class="fa-solid fa-paper-plane mr-1"></i> KIRIM DRONE INSPEKSI
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Emergency Alert Overlay Banner -->
+                    <div id="emergency-banner" class="hidden absolute top-3 left-1/2 -translate-x-1/2 bg-rose-950/90 border border-rose-500 text-rose-200 px-4 py-2 rounded-full font-mono text-xs font-bold flex items-center space-x-2 shadow-2xl animate-bounce z-20">
+                        <i class="fa-solid fa-triangle-exclamation text-rose-400 text-sm"></i>
+                        <span id="emergency-banner-text">PERINGATAN: Kebakaran Terdeteksi di Sektor 2!</span>
+                    </div>
+                </div>
+
+                <!-- Canvas Footer Status Bar -->
+                <div class="flex flex-wrap items-center justify-between gap-2 mt-2 pt-2 border-t border-slate-800/80 text-[11px] font-mono text-slate-400">
+                    <div class="flex items-center space-x-4">
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-400 inline-block"></span> Gedung AI</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span> Solar Station</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> Mobil Otonom</span>
+                    </div>
+                    <div class="text-cyan-400 font-bold">
+                        FPS: <span id="fps-counter">60</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN: TELEMETRY & LIVE STREAM LOGS (3 cols) -->
+        <section class="lg:col-span-3 flex flex-col space-y-4">
+            
+            <!-- Telemetry Metrics Cards -->
+            <div class="grid grid-cols-2 gap-2 font-mono">
+                <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800">
+                    <div class="text-[10px] text-slate-400 flex items-center justify-between">
+                        <span>LALU LINTAS</span>
+                        <i class="fa-solid fa-car text-cyan-400"></i>
+                    </div>
+                    <div id="kpi-traffic" class="text-lg font-bold text-cyan-300 mt-1">28%</div>
+                    <div class="text-[10px] text-emerald-400 mt-0.5">Aliran Optimal</div>
+                </div>
+
+                <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800">
+                    <div class="text-[10px] text-slate-400 flex items-center justify-between">
+                        <span>POWER GRID</span>
+                        <i class="fa-solid fa-bolt text-amber-400"></i>
+                    </div>
+                    <div id="kpi-power" class="text-lg font-bold text-amber-300 mt-1">135 MW</div>
+                    <div class="text-[10px] text-amber-400 mt-0.5">100% Terbarukan</div>
+                </div>
+
+                <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800">
+                    <div class="text-[10px] text-slate-400 flex items-center justify-between">
+                        <span>UDARA PM2.5</span>
+                        <i class="fa-solid fa-wind text-emerald-400"></i>
+                    </div>
+                    <div id="kpi-air" class="text-lg font-bold text-emerald-300 mt-1">18 PM</div>
+                    <div class="text-[10px] text-emerald-400 mt-0.5">Sangat Clean</div>
+                </div>
+
+                <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800">
+                    <div class="text-[10px] text-slate-400 flex items-center justify-between">
+                        <span>SIBER SHIELD</span>
+                        <i class="fa-solid fa-shield text-purple-400"></i>
+                    </div>
+                    <div id="kpi-cyber" class="text-lg font-bold text-purple-300 mt-1">100%</div>
+                    <div class="text-[10px] text-purple-400 mt-0.5">AI Protected</div>
+                </div>
+            </div>
+
+            <!-- Live Sparkline Charts -->
+            <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 space-y-3 shadow-lg">
+                <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+                    <span class="text-xs font-display font-bold text-cyan-400 flex items-center gap-1.5">
+                        <i class="fa-solid fa-chart-line"></i> TELEMETRY REAL-TIME
+                    </span>
+                    <span class="text-[10px] font-mono text-emerald-400 animate-pulse">● LIVE</span>
+                </div>
+
+                <!-- Traffic Chart -->
+                <div>
+                    <div class="flex justify-between text-[11px] font-mono text-slate-400 mb-1">
+                        <span>Beban Lalu Lintas Kota (%)</span>
+                        <span id="chart-val-traffic" class="text-cyan-300">28%</span>
+                    </div>
+                    <canvas id="chartTraffic" class="w-full h-12 bg-slate-950 rounded border border-slate-800"></canvas>
+                </div>
+
+                <!-- Energy Balance Chart -->
+                <div>
+                    <div class="flex justify-between text-[11px] font-mono text-slate-400 mb-1">
+                        <span>Produksi Energi Terbarukan (MW)</span>
+                        <span id="chart-val-energy" class="text-amber-300">135 MW</span>
+                    </div>
+                    <canvas id="chartEnergy" class="w-full h-12 bg-slate-950 rounded border border-slate-800"></canvas>
+                </div>
+            </div>
+
+            <!-- Real-Time Event Log Terminal -->
+            <div class="bg-slate-900/90 rounded-xl p-3 border border-slate-800 flex-1 flex flex-col justify-between font-mono shadow-xl">
+                <div class="flex items-center justify-between border-b border-slate-800 pb-1.5 mb-2">
+                    <span class="text-xs font-display font-bold text-slate-300 flex items-center gap-1.5">
+                        <i class="fa-solid fa-terminal text-cyan-400"></i> LIVE EVENT LOG STREAM
+                    </span>
+                    <button onclick="clearLogs()" class="text-[10px] text-slate-500 hover:text-slate-300">Clear</button>
+                </div>
+
+                <div id="log-container" class="h-44 overflow-y-auto space-y-1.5 text-[11px] pr-1">
+                    <!-- Dynamic logs appended here -->
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        /* ==========================================================================
+           1. WEB AUDIO API SYNTHESIZER (NO EXTERNAL AUDIO FILES REQUIRED)
+           ========================================================================== */
+        let audioCtx = null;
+        let audioEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+        }
+
+        function playBeep(freq = 800, type = 'sine', duration = 0.08) {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function playSuccessSound() {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.setValueAtTime(659.25, now + 0.08); // E5
+                osc.frequency.setValueAtTime(783.99, now + 0.16); // G5
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(now + 0.3);
+            } catch (e) {}
+        }
+
+        function playAlarmSound() {
+            if (!audioEnabled) return;
+            try {
+                initAudio();
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(880, now);
+                osc.frequency.linearRampToValueAtTime(440, now + 0.25);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(now + 0.3);
+            } catch (e) {}
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const btnLabel = document.getElementById('audio-label');
+            const btnIcon = document.getElementById('audio-icon');
+            if (audioEnabled) {
+                btnLabel.innerText = "SFX: ON";
+                btnIcon.className = "fa-solid fa-volume-high text-cyan-400";
+                playBeep(1000, 'sine', 0.1);
+            } else {
+                btnLabel.innerText = "SFX: OFF";
+                btnIcon.className = "fa-solid fa-volume-xmark text-slate-500";
+            }
+        }
+
+        /* ==========================================================================
+           2. GLOBAL STATE & CITY SIMULATION VARIABLES
+           ========================================================================== */
+        const state = {
+            trafficLoad: 28, // 0 - 100%
+            solarOutput: 75, // MW
+            windOutput: 60, // MW
+            cityDemand: 110, // MW
+            ecoMode: false,
+            airQuality: 18, // PM2.5
+            cyberThreats: 0,
+            firewallActive: true,
+            emergencyActive: false,
+            emergencyPos: { x: 0, y: 0 },
+            emergencyType: null,
+            expoMode: false,
+            expoTimer: null,
+            mapLayers: {
+                traffic: true,
+                energy: false,
+                sensors: true
+            }
+        };
+
+        // Canvas Entities
+        let canvas, ctx;
+        let buildings = [];
+        let roads = [];
+        let vehicles = [];
+        let drones = [];
+        let iotNodes = [];
+        let particles = [];
+        let selectedZone = null;
+
+        // Telemetry Data Buffers for Charts
+        const maxDataPoints = 30;
+        const trafficData = Array(maxDataPoints).fill(28);
+        const energyData = Array(maxDataPoints).fill(135);
+
+        /* ==========================================================================
+           3. DIGITAL TWIN CANVAS RENDER ENGINE
+           ========================================================================== */
+        function initCanvas() {
+            canvas = document.getElementById('cityCanvas');
+            ctx = canvas.getContext('2d');
+            resizeCanvas();
+
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Mouse interactions on Canvas
+            canvas.addEventListener('mousemove', handleCanvasMouseMove);
+            canvas.addEventListener('click', handleCanvasClick);
+
+            generateCityGrid();
+        }
+
+        function resizeCanvas() {
+            const container = document.getElementById('canvas-container');
+            canvas.width = container.clientWidth;
+            canvas.height = container.clientHeight;
+            generateCityGrid(); // Regenerate grid layout proportionally
+        }
+
+        function generateCityGrid() {
+            const w = canvas.width;
+            const h = canvas.height;
+            if (w === 0 || h === 0) return;
+
+            buildings = [];
+            roads = [];
+            vehicles = [];
+            drones = [];
+            iotNodes = [];
+
+            // Main Avenues (Road Grid)
+            const mainRoadY1 = h * 0.35;
+            const mainRoadY2 = h * 0.7;
+            const mainRoadX1 = w * 0.3;
+            const mainRoadX2 = w * 0.7;
+
+            roads.push({ x1: 0, y1: mainRoadY1, x2: w, y2: mainRoadY1, horizontal: true });
+            roads.push({ x1: 0, y1: mainRoadY2, x2: w, y2: mainRoadY2, horizontal: true });
+            roads.push({ x1: mainRoadX1, y1: 0, x2: mainRoadX1, y2: h, horizontal: false });
+            roads.push({ x1: mainRoadX2, y1: 0, x2: mainRoadX2, y2: h, horizontal: false });
+
+            // Generate Buildings in Grid Blocks
+            const gridCols = 5;
+            const gridRows = 4;
+            const cellW = w / gridCols;
+            const cellH = h / gridRows;
+
+            for (let r = 0; r < gridRows; r++) {
+                for (let c = 0; c < gridCols; c++) {
+                    const bx = c * cellW + cellW * 0.2;
+                    const by = r * cellH + cellH * 0.2;
+                    const bw = cellW * 0.6;
+                    const bh = cellH * 0.5;
+
+                    // Building Type
+                    let type = 'commercial';
+                    let color = '#00f0ff';
+                    if (r === 0 && c === 0) { type = 'solar'; color = '#ffb700'; }
+                    else if (r === gridRows - 1 && c === gridCols - 1) { type = 'cyber'; color = '#a855f7'; }
+
+                    buildings.push({
+                        id: `bld-${r}-${c}`,
+                        x: bx,
+                        y: by,
+                        w: bw,
+                        h: bh,
+                        type: type,
+                        color: color,
+                        height3d: Math.random() * 25 + 15,
+                        powerDemand: (Math.random() * 5 + 2).toFixed(1)
+                    });
+
+                    // Add IoT sensor node to building
+                    iotNodes.push({
+                        x: bx + bw / 2,
+                        y: by + bh / 2,
+                        buildingId: `bld-${r}-${c}`,
+                        type: type,
+                        pulse: Math.random() * Math.PI
+                    });
+                }
+            }
+
+            // Spawn Initial Vehicles
+            for (let i = 0; i < 16; i++) {
+                spawnVehicle();
+            }
+
+            // Spawn Initial Drones
+            drones.push({
+                x: w * 0.2,
+                y: h * 0.3,
+                targetX: w * 0.8,
+                targetY: h * 0.3,
+                speed: 1.5,
+                type: 'patrol',
+                color: '#00f0ff'
+            });
+            drones.push({
+                x: w * 0.7,
+                y: h * 0.8,
+                targetX: w * 0.2,
+                targetY: h * 0.8,
+                speed: 1.8,
+                type: 'patrol',
+                color: '#a855f7'
+            });
+        }
+
+        function spawnVehicle() {
+            if (roads.length === 0) return;
+            const road = roads[Math.floor(Math.random() * roads.length)];
+            const isHorizontal = road.horizontal;
+            
+            vehicles.push({
+                x: isHorizontal ? Math.random() * canvas.width : road.x1,
+                y: isHorizontal ? road.y1 : Math.random() * canvas.height,
+                dx: isHorizontal ? (Math.random() > 0.5 ? 1 : -1) : 0,
+                dy: !isHorizontal ? (Math.random() > 0.5 ? 1 : -1) : 0,
+                speed: Math.random() * 1.2 + 0.8,
+                isBus: Math.random() > 0.7,
+                color: Math.random() > 0.7 ? '#00ff66' : '#00f0ff'
+            });
+        }
+
+        let lastTime = performance.now();
+        let frameCount = 0;
+
+        function renderLoop(now) {
+            frameCount++;
+            if (now - lastTime >= 1000) {
+                document.getElementById('fps-counter').innerText = frameCount;
+                frameCount = 0;
+                lastTime = now;
+            }
+
+            // Clear Background
+            ctx.fillStyle = '#030712';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 1. Draw Grid Lines Background
+            drawGridLines();
+
+            // 2. Draw Roads & Traffic Overlay
+            drawRoads();
+
+            // 3. Draw Buildings (Cyber-style with 2.5D depth offset)
+            drawBuildings();
+
+            // 4. Draw IoT Nodes (pulsing circles)
+            if (state.mapLayers.sensors) drawIoTNodes();
+
+            // 5. Update & Draw Vehicles
+            updateAndDrawVehicles();
+
+            // 6. Update & Draw Drones
+            updateAndDrawDrones();
+
+            // 7. Draw Active Emergency Fire Event & Particles
+            if (state.emergencyActive) drawEmergencyEvent();
+
+            // 8. Draw Particles Effect
+            updateAndDrawParticles();
+
+            requestAnimationFrame(renderLoop);
+        }
+
+        function drawGridLines() {
+            ctx.strokeStyle = 'rgba(0, 240, 255, 0.04)';
+            ctx.lineWidth = 1;
+            const step = 30;
+
+            for (let x = 0; x < canvas.width; x += step) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += step) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        function drawRoads() {
+            roads.forEach(r => {
+                ctx.strokeStyle = state.mapLayers.traffic && state.trafficLoad > 60 ? 'rgba(255, 183, 0, 0.4)' : 'rgba(0, 240, 255, 0.2)';
+                ctx.lineWidth = 12;
+                ctx.beginPath();
+                ctx.moveTo(r.x1, r.y1);
+                ctx.lineTo(r.x2, r.y2);
+                ctx.stroke();
+
+                // Road Center Lane Line
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([6, 6]);
+                ctx.beginPath();
+                ctx.moveTo(r.x1, r.y1);
+                ctx.lineTo(r.x2, r.y2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            });
+        }
+
+        function drawBuildings() {
+            buildings.forEach(b => {
+                const off = b.height3d * 0.4;
+
+                // 2.5D Side Shadow Wall
+                ctx.fillStyle = 'rgba(10, 16, 34, 0.8)';
+                ctx.fillRect(b.x + off, b.y - off, b.w, b.h);
+
+                // Main Roof Surface
+                ctx.fillStyle = '#090e1a';
+                ctx.strokeStyle = b.color;
+                ctx.lineWidth = 1.5;
+                ctx.fillRect(b.x, b.y, b.w, b.h);
+                ctx.strokeRect(b.x, b.y, b.w, b.h);
+
+                // Roof Accent Details / Solar Pattern
+                if (b.type === 'solar') {
+                    ctx.fillStyle = 'rgba(255, 183, 0, 0.3)';
+                    ctx.fillRect(b.x + 4, b.y + 4, b.w - 8, b.h - 8);
+                } else if (b.type === 'cyber') {
+                    ctx.fillStyle = 'rgba(168, 85, 247, 0.3)';
+                    ctx.fillRect(b.x + 4, b.y + 4, b.w - 8, b.h - 8);
+                }
+
+                // Window Lights
+                ctx.fillStyle = b.color;
+                ctx.fillRect(b.x + 6, b.y + 6, 4, 4);
+                ctx.fillRect(b.x + b.w - 10, b.y + 6, 4, 4);
+            });
+        }
+
+        function drawIoTNodes() {
+            iotNodes.forEach(node => {
+                node.pulse += 0.05;
+                const radius = 4 + Math.sin(node.pulse) * 2;
+
+                ctx.fillStyle = node.type === 'solar' ? '#ffb700' : '#00f0ff';
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, radius, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Outer Halo
+                ctx.strokeStyle = node.type === 'solar' ? 'rgba(255, 183, 0, 0.3)' : 'rgba(0, 240, 255, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.arc(node.x, node.y, radius * 2.5, 0, Math.PI * 2);
+                ctx.stroke();
+            });
+        }
+
+        function updateAndDrawVehicles() {
+            // Speed adjusted by traffic load
+            const speedFactor = Math.max(0.2, (100 - state.trafficLoad) / 70);
+
+            vehicles.forEach(v => {
+                v.x += v.dx * v.speed * speedFactor;
+                v.y += v.dy * v.speed * speedFactor;
+
+                // Screen Wrap
+                if (v.x < 0) v.x = canvas.width;
+                if (v.x > canvas.width) v.x = 0;
+                if (v.y < 0) v.y = canvas.height;
+                if (v.y > canvas.height) v.y = 0;
+
+                // Draw Vehicle
+                ctx.fillStyle = v.isBus ? '#ff007f' : v.color;
+                const size = v.isBus ? 7 : 4;
+                ctx.fillRect(v.x - size / 2, v.y - size / 2, size, size);
+
+                // Glowing Headlight Trail
+                ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
+                ctx.fillRect(v.x - v.dx * 6, v.y - v.dy * 6, 2, 2);
+            });
+        }
+
+        function updateAndDrawDrones() {
+            drones.forEach(d => {
+                const dx = d.targetX - d.x;
+                const dy = d.targetY - d.y;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist > 5) {
+                    d.x += (dx / dist) * d.speed;
+                    d.y += (dy / dist) * d.speed;
+                } else {
+                    // Choose new random patrol target or return
+                    d.targetX = Math.random() * (canvas.width - 100) + 50;
+                    d.targetY = Math.random() * (canvas.height - 100) + 50;
+                }
+
+                // Draw Drone Icon / Quadcopter visual
+                ctx.strokeStyle = d.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, 6, 0, Math.PI * 2);
+                ctx.stroke();
+
+                // Cross Rotor Lines
+                ctx.beginPath();
+                ctx.moveTo(d.x - 8, d.y); ctx.lineTo(d.x + 8, d.y);
+                ctx.moveTo(d.x, d.y - 8); ctx.lineTo(d.x, d.y + 8);
+                ctx.stroke();
+
+                // Light Spot Center
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(d.x - 1.5, d.y - 1.5, 3, 3);
+            });
+        }
+
+        function drawEmergencyEvent() {
+            const ex = state.emergencyPos.x;
+            const ey = state.emergencyPos.y;
+
+            // Flashing Red Emergency Pulse Ring
+            const pulse = (Date.now() % 1000) / 1000;
+            ctx.strokeStyle = `rgba(255, 0, 127, ${1 - pulse})`;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(ex, ey, pulse * 40 + 10, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // Emergency Warning Icon Center
+            ctx.fillStyle = '#ff007f';
+            ctx.beginPath();
+            ctx.arc(ex, ey, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Spawn Fire/Smoke Particles
+            if (Math.random() > 0.4) {
+                particles.push({
+                    x: ex + (Math.random() - 0.5) * 10,
+                    y: ey + (Math.random() - 0.5) * 10,
+                    vx: (Math.random() - 0.5) * 1.5,
+                    vy: -Math.random() * 2 - 1,
+                    life: 1,
+                    color: Math.random() > 0.5 ? '#ff007f' : '#ffb700'
+                });
+            }
+        }
+
+        function updateAndDrawParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= 0.03;
+
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life;
+                ctx.fillRect(p.x, p.y, 3, 3);
+                ctx.globalAlpha = 1.0;
+            }
+        }
+
+        /* ==========================================================================
+           4. CANVAS INTERACTION HANDLERS
+           ========================================================================== */
+        function handleCanvasMouseMove(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.round(e.clientX - rect.left);
+            const y = Math.round(e.clientY - rect.top);
+            document.getElementById('map-hover-coords').innerText = `X: ${x} | Y: ${y}`;
+        }
+
+        function handleCanvasClick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            playBeep(900, 'triangle', 0.05);
+
+            // Check if clicked building or IoT node
+            let clicked = null;
+            buildings.forEach(b => {
+                if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) {
+                    clicked = b;
+                }
+            });
+
+            if (clicked) {
+                selectedZone = clicked;
+                showZoneModal(clicked);
+            } else {
+                closeZoneModal();
+            }
+        }
+
+        function showZoneModal(building) {
+            const modal = document.getElementById('zone-modal');
+            modal.classList.remove('hidden');
+
+            document.getElementById('zone-modal-title').innerHTML = `<i class="fa-solid fa-microchip text-cyan-400"></i> DETEKSI ZONA #${building.id}`;
+            document.getElementById('zone-type').innerText = building.type === 'solar' ? 'Stasiun Solar Park' : building.type === 'cyber' ? 'Pusat Keamanan Siber' : 'Gedung Komersial AI';
+            document.getElementById('zone-power').innerText = `${building.powerDemand} MW`;
+            document.getElementById('zone-air').innerText = `PM2.5: ${state.airQuality} (Baik)`;
+            document.getElementById('zone-status').innerText = 'TERHUBUNG (100%)';
+
+            addLog(`[INSPEKSI] Sensor Zona ${building.id} dipindai oleh pengunjung.`, 'cyan');
+        }
+
+        function closeZoneModal() {
+            document.getElementById('zone-modal').classList.add('hidden');
+        }
+
+        function dispatchDroneToZone() {
+            if (!selectedZone) return;
+            playBeep(1200, 'sine', 0.1);
+
+            drones.push({
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                targetX: selectedZone.x + selectedZone.w / 2,
+                targetY: selectedZone.y + selectedZone.h / 2,
+                speed: 2.5,
+                type: 'inspection',
+                color: '#00ff66'
+            });
+
+            addLog(`[DRONE] Drone Inspeksi diluncurkan ke Zona #${selectedZone.id}.`, 'emerald');
+            closeZoneModal();
+        }
+
+        /* ==========================================================================
+           5. INTERACTIVE CONTROL PANEL LOGIC
+           ========================================================================== */
+        function switchTab(tabName) {
+            playBeep(700, 'sine', 0.05);
+
+            // Hide all panels
+            document.querySelectorAll('.control-panel').forEach(p => p.classList.add('hidden'));
+            
+            // Unhighlight all tabs
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.className = "tab-btn px-2.5 py-2 rounded-lg border border-slate-800 bg-slate-900 text-slate-400 hover:text-slate-200 flex items-center justify-center space-x-1.5 transition";
+            });
+
+            // Show selected panel
+            document.getElementById(`panel-${tabName}`).classList.remove('hidden');
+            
+            // Highlight selected tab
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            activeTab.className = "tab-btn px-2.5 py-2 rounded-lg border border-cyan-500/50 bg-cyan-950/60 text-cyan-300 font-semibold flex items-center justify-center space-x-1.5 transition glow-cyan";
+        }
+
+        // Traffic Control Functions
+        function optimizeTraffic() {
+            playSuccessSound();
+            state.trafficLoad = Math.max(12, state.trafficLoad - 35);
+            updateTrafficUI();
+            addLog(`[AI TRAFFIC] algoritma AI mengoptimalkan waktu lampu hijau. Beban berkurang.`, 'emerald');
+        }
+
+        function dispatchBuses() {
+            playBeep(800, 'sine', 0.08);
+            for (let i = 0; i < 4; i++) spawnVehicle();
+            addLog(`[LALU LINTAS] +4 Bus Listrik Otonom diluncurkan ke koridor utama.`, 'cyan');
+        }
+
+        function triggerTrafficJam() {
+            playAlarmSound();
+            state.trafficLoad = Math.min(95, state.trafficLoad + 40);
+            updateTrafficUI();
+            addLog(`[PERINGATAN] Kemacetan disimulasikan di Sektor 3! Sinyal padat.`, 'amber');
+        }
+
+        function updateTrafficUI() {
+            document.getElementById('traffic-bar').style.width = `${state.trafficLoad}%`;
+            document.getElementById('traffic-status-text').innerText = state.trafficLoad > 60 ? `PADAT (${state.trafficLoad}%)` : `LANCAR (${state.trafficLoad}%)`;
+            document.getElementById('traffic-status-text').className = state.trafficLoad > 60 ? 'text-amber-400 font-bold' : 'text-emerald-400 font-bold';
+            document.getElementById('kpi-traffic').innerText = `${state.trafficLoad}%`;
+        }
+
+        // Energy Grid Functions
+        function updateEnergyGrid() {
+            state.solarOutput = parseInt(document.getElementById('slider-solar').value);
+            state.windOutput = parseInt(document.getElementById('slider-wind').value);
+
+            document.getElementById('val-solar').innerText = `${state.solarOutput} MW`;
+            document.getElementById('val-wind').innerText = `${state.windOutput} MW`;
+
+            const totalOutput = state.solarOutput + state.windOutput;
+            const balance = totalOutput - state.cityDemand;
+
+            document.getElementById('kpi-power').innerText = `${totalOutput} MW`;
+            document.getElementById('energy-balance-text').innerText = balance >= 0 ? `+${balance} MW (SURPLUS)` : `${balance} MW (DEFISIT)`;
+            document.getElementById('energy-balance-text').className = balance >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold';
+        }
+
+        function toggleEcoMode() {
+            playBeep(950, 'sine', 0.08);
+            state.ecoMode = !state.ecoMode;
+            const btnLabel = document.getElementById('eco-label');
+            if (state.ecoMode) {
+                btnLabel.innerText = "MODE HEMAT ENERGI: AKTIF";
+                state.cityDemand = 80;
+                addLog(`[ENERGI] Mode Eco Aktif. Konsumsi daya gedung dikurangi 25%.`, 'emerald');
+            } else {
+                btnLabel.innerText = "MODE HEMAT ENERGI: NONAKTIF";
+                state.cityDemand = 110;
+                addLog(`[ENERGI] Mode Eco Nonaktif. Konsumsi daya kembali normal.`, 'slate');
+            }
+            updateEnergyGrid();
+        }
+
+        // Emergency & Drone Functions
+        function triggerEmergencyEvent() {
+            playAlarmSound();
+            state.emergencyActive = true;
+            state.emergencyPos = {
+                x: Math.random() * (canvas.width - 150) + 75,
+                y: Math.random() * (canvas.height - 150) + 75
+            };
+
+            document.getElementById('header-emergency-status').innerText = 'ALERT DARURAT';
+            document.getElementById('header-emergency-status').className = 'text-rose-400 font-bold animate-pulse-fast';
+            document.getElementById('emergency-banner').classList.remove('hidden');
+
+            addLog(`[DARURAT] Peringatan! Sensor mendeteksi insiden di Koordinat (${Math.round(state.emergencyPos.x)}, ${Math.round(state.emergencyPos.y)}).`, 'rose');
+        }
+
+        function dispatchFireDrone() {
+            if (!state.emergencyActive) {
+                addLog(`[DRONE] Tidak ada insiden aktif saat ini.`, 'slate');
+                return;
+            }
+            playSuccessSound();
+
+            drones.push({
+                x: canvas.width / 2,
+                y: canvas.height / 2,
+                targetX: state.emergencyPos.x,
+                targetY: state.emergencyPos.y,
+                speed: 3.5,
+                type: 'fire',
+                color: '#ff007f'
+            });
+
+            addLog(`[RESPONS] Drone Pemadam api diluncurkan ke lokasi insiden.`, 'cyan');
+
+            setTimeout(() => {
+                state.emergencyActive = false;
+                document.getElementById('emergency-banner').classList.add('hidden');
+                document.getElementById('header-emergency-status').innerText = 'NORMAL';
+                document.getElementById('header-emergency-status').className = 'text-emerald-400 font-bold';
+                addLog(`[SUKSES] Insiden berhasil ditangani oleh Drone Pemadam AI.`, 'emerald');
+            }, 3500);
+        }
+
+        function dispatchMedicalDrone() {
+            playBeep(1100, 'sine', 0.1);
+            drones.push({
+                x: 50,
+                y: 50,
+                targetX: canvas.width - 100,
+                targetY: canvas.height - 100,
+                speed: 3.0,
+                type: 'medical',
+                color: '#00f0ff'
+            });
+            addLog(`[DRONE] Drone Medis DARURAT diluncurkan untuk patroli kesehatan.`, 'cyan');
+        }
+
+        // Cyber Security Functions
+        function toggleFirewall() {
+            playSuccessSound();
+            state.firewallActive = !state.firewallActive;
+            const label = document.getElementById('firewall-label');
+            if (state.firewallActive) {
+                label.innerText = "AKTIFKAN AI FIREWALL HIGH-SHIELD";
+                document.getElementById('kpi-cyber').innerText = "100%";
+                addLog(`[CYBER] AI Firewall dikonfigurasi ke tingkat Perlindungan Tinggi.`, 'purple');
+            } else {
+                label.innerText = "NONAKTIFKAN FIREWALL";
+                document.getElementById('kpi-cyber').innerText = "60%";
+                addLog(`[CYBER] Peringatan: Firewall diturunkan.`, 'amber');
+            }
+        }
+
+        function simulateCyberAttack() {
+            playAlarmSound();
+            state.cyberThreats += 12;
+            document.getElementById('cyber-threat-text').innerText = `KRITIS (${state.cyberThreats} ANCAMAN DETEKSI)`;
+            document.getElementById('cyber-threat-text').className = 'text-rose-400 font-bold';
+            document.getElementById('kpi-cyber').innerText = "35%";
+
+            addLog(`[SERANGAN SIBER] Anomali lalu lintas data terdeteksi pada Router IoT Sektor 4!`, 'rose');
+        }
+
+        /* ==========================================================================
+           6. TELEMETRY CHARTS & LOG TERMINAL LOGIC
+           ========================================================================== */
+        function initCharts() {
+            drawSparkline('chartTraffic', trafficData, '#00f0ff');
+            drawSparkline('chartEnergy', energyData, '#ffb700');
+        }
+
+        function updateChartsData() {
+            // Push new dynamic data
+            trafficData.shift();
+            trafficData.push(state.trafficLoad + (Math.random() * 4 - 2));
+
+            energyData.shift();
+            const totalEnergy = state.solarOutput + state.windOutput;
+            energyData.push(totalEnergy + (Math.random() * 6 - 3));
+
+            drawSparkline('chartTraffic', trafficData, '#00f0ff');
+            drawSparkline('chartEnergy', energyData, '#ffb700');
+
+            document.getElementById('chart-val-traffic').innerText = `${Math.round(trafficData[trafficData.length - 1])}%`;
+            document.getElementById('chart-val-energy').innerText = `${Math.round(energyData[energyData.length - 1])} MW`;
+        }
+
+        function drawSparkline(canvasId, data, color) {
+            const cvs = document.getElementById(canvasId);
+            if (!cvs) return;
+            const c = cvs.getContext('2d');
+            const w = cvs.width = cvs.clientWidth;
+            const h = cvs.height = cvs.clientHeight;
+
+            c.clearRect(0, 0, w, h);
+
+            const min = Math.min(...data) * 0.8;
+            const max = Math.max(...data) * 1.2 || 100;
+
+            c.strokeStyle = color;
+            c.lineWidth = 2;
+            c.beginPath();
+
+            const step = w / (data.length - 1);
+            data.forEach((val, i) => {
+                const x = i * step;
+                const y = h - ((val - min) / (max - min)) * h;
+                if (i === 0) c.moveTo(x, y);
+                else c.lineTo(x, y);
+            });
+
+            c.stroke();
+
+            // Fill area gradient
+            c.lineTo(w, h);
+            c.lineTo(0, h);
+            c.closePath();
+            c.fillStyle = `${color}22`;
+            c.fill();
+        }
+
+        function addLog(message, type = 'slate') {
+            const container = document.getElementById('log-container');
+            const timeStr = new Date().toLocaleTimeString('id-ID');
+
+            let colorClass = 'text-slate-300';
+            if (type === 'cyan') colorClass = 'text-cyan-300';
+            if (type === 'emerald') colorClass = 'text-emerald-400';
+            if (type === 'amber') colorClass = 'text-amber-300';
+            if (type === 'rose') colorClass = 'text-rose-400 font-bold';
+            if (type === 'purple') colorClass = 'text-purple-300';
+
+            const logEntry = document.createElement('div');
+            logEntry.className = `flex space-x-1.5 ${colorClass} animate-fade-in`;
+            logEntry.innerHTML = `<span class="text-slate-500">[${timeStr}]</span> <span>${message}</span>`;
+
+            container.appendChild(logEntry);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function clearLogs() {
+            document.getElementById('log-container').innerHTML = '';
+        }
+
+        /* ==========================================================================
+           7. EXPO SHOWCASE AUTOMATED DEMO MODE
+           ========================================================================== */
+        function toggleExpoMode() {
+            playBeep(1000, 'sine', 0.1);
+            state.expoMode = !state.expoMode;
+            const label = document.getElementById('expo-label');
+
+            if (state.expoMode) {
+                label.innerText = "EXPO DEMO: AKTIF";
+                label.parentElement.className = "px-3 py-1.5 rounded-lg bg-amber-500 border border-amber-300 text-black font-bold text-xs font-mono transition flex items-center space-x-2 shadow-lg animate-pulse";
+                addLog(`[EXPO] Mode Pameran Otomatis diaktifkan untuk demonstrasi pengunjung!`, 'amber');
+
+                runExpoStep();
+                state.expoTimer = setInterval(runExpoStep, 8000);
+            } else {
+                label.innerText = "EXPO MODE";
+                label.parentElement.className = "px-3 py-1.5 rounded-lg bg-indigo-950/80 border border-indigo-500/50 hover:border-indigo-400 text-xs font-mono text-indigo-300 transition flex items-center space-x-2 shadow";
+                clearInterval(state.expoTimer);
+                addLog(`[EXPO] Mode Pameran Otomatis dinonaktifkan.`, 'slate');
+            }
+        }
+
+        let expoStep = 0;
+        function runExpoStep() {
+            const steps = [
+                () => { switchTab('traffic'); optimizeTraffic(); },
+                () => { switchTab('energy'); toggleEcoMode(); },
+                () => { switchTab('emergency'); triggerEmergencyEvent(); },
+                () => { dispatchFireDrone(); },
+                () => { switchTab('cyber'); simulateCyberAttack(); },
+                () => { toggleFirewall(); }
+            ];
+
+            steps[expoStep]();
+            expoStep = (expoStep + 1) % steps.length;
+        }
+
+        // Fullscreen Toggle
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                if (document.exitFullscreen) document.exitFullscreen();
+            }
+        }
+
+        // Map Layers Toggle
+        function toggleMapLayer(layer) {
+            playBeep(800, 'sine', 0.05);
+            state.mapLayers[layer] = !state.mapLayers[layer];
+            const btn = document.getElementById(`layer-${layer}-btn`);
+            if (state.mapLayers[layer]) {
+                btn.className = "px-2 py-1 rounded bg-cyan-950 text-cyan-300 border border-cyan-500/40 font-semibold";
+            } else {
+                btn.className = "px-2 py-1 rounded bg-slate-800 text-slate-500 border border-slate-700";
+            }
+        }
+
+        /* ==========================================================================
+           8. INITIALIZATION ON WINDOW LOAD
+           ========================================================================== */
+        window.onload = function() {
+            // Real-Time Clock
+            setInterval(() => {
+                const now = new Date();
+                document.getElementById('header-clock').innerText = now.toLocaleTimeString('id-ID') + " WIB";
+            }, 1000);
+
+            // Init Canvas Render Engine
+            initCanvas();
+            requestAnimationFrame(renderLoop);
+
+            // Init Sparkline Charts
+            initCharts();
+            setInterval(updateChartsData, 2000);
+
+            // System Load Simulation
+            setInterval(() => {
+                const load = Math.floor(Math.random() * 15 + 25);
+                document.getElementById('header-ai-load').innerText = `${load}%`;
+            }, 4000);
+
+            // Initial Logs
+            addLog("Pusat Kontrol Digital Twin NEXUS CITY Berhasil Diinisialisasi.", "emerald");
+            addLog("Menghubungkan ke 10,000+ Sensor IoT Sektor Perkotaan...", "cyan");
+            addLog("Sistem AI Command Center Siap untuk Pameran IT.", "amber");
+        };
+    </script>
+</body>
+</html>
